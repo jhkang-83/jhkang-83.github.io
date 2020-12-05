@@ -1,4 +1,4 @@
-### Jihye | Back-end 개발자
+### Jihye | Back-end developer
 
 <!--
 **jhkang-83/jhkang-83** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
@@ -14,3 +14,4 @@ Here are some ideas to get you started:
 - 😄 Pronouns: ...
 - ⚡ Fun fact: ...
 -->
+10년차, 웹이 좋아 일하는 개발자 강지혜입니다.
