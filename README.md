@@ -1,4 +1,4 @@
-### Hi there 👋
+### Jihye | Back-end 개발자
 
 <!--
 **jhkang-83/jhkang-83** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
