@@ -367,26 +367,6 @@ public class AttachmentAgency {
 		}
 		
 		net.minidev.json.JSONArray arrayJson = JsonUtil.getJsonArrayFromList(list);
-//		StringBuffer fileListXML = new StringBuffer("<?xml version='1.0' encoding='UTF-8' ?>\n<filelist>");
-//		for (int i=0; i<list.size(); i++)
-//		{
-//			java.util.Map fileMap = list.get(i);
-//			XMLUtils.exchangeNamedEntityMap(fileMap);
-//			fileListXML.append("<file " +
-//					" name='" + fileMap.get("orgn_file_nm") + "'" +
-//					" size='" + fileMap.get("att_file_siz") + "'" + 
-//					" att_seq='" + fileMap.get("att_seq") + "'" +
-//					" grp_cd='" + fileMap.get("grp_cd") + "'" +
-//					" att_file_nm='" + fileMap.get("att_file_nm") + "'" +
-//					" att_file_path='" + fileMap.get("att_file_path") + "'" +
-//					" reg_nm='" + fileMap.get("reg_nm") + "'" +
-//					" reg_dt='" + fileMap.get("reg_dt") + "'" +
-//					"/>");
-//			fileListXML.append("\n");
-//		}
-//		fileListXML.append("</filelist>");
-//		
-//		System.out.println("fileListXML >> " + fileListXML);
 		JSONObject resultJson = new JSONObject(arrayJson);
 		
 		System.out.println("resultJson >> " + arrayJson);
@@ -815,15 +795,12 @@ public class AttachmentAgency {
 			TransactionManager.getInstance().accept();
 		} catch (SizeLimitExceededException e) {
 			attachments="Error : 파일사이즈가 초과되었습니다.(업로드 사이즈 :" + (e.getActualSize() / 1024 / 1024) + ", 업로드 가능한 사이즈:"+ (e.getPermittedSize() / 1024 / 1024 ) +")";
-//			e.printStackTrace();
 			TransactionManager.getInstance().restore();
 		} catch (FileUploadException e) {
 			attachments="Error : [upload] 파일 전송중 오류가 발생하였습니다. 파일삭제 후 임시저장하십시요.(외부전송파일)";
-//			e.printStackTrace();
 			TransactionManager.getInstance().restore();
 		} catch (Exception e) {
 			attachments="Error : " + e.getMessage();
-//			e.printStackTrace();
 			TransactionManager.getInstance().restore();
 		} finally {
 			TransactionManager.getInstance().removeSession();
