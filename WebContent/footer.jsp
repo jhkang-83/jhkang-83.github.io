@@ -4,7 +4,6 @@
 				<ul>
 					<li><a class="footerLink" href=""> 이용약관 </a></li>
 					<li>시스템 문의</li>
-<!-- 					<li>TEL : 02-6400-6243</li> -->
 					<li>Mail : jhkang@partner.sk.com</li>
 				</ul>
 			</div>
