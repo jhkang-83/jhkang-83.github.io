@@ -15,8 +15,6 @@
 %>
 
 <head>
-<!-- 	<link rel="stylesheet" type="text/css" href="/assets/css/gnb.css?ver=1"> -->
-	
 	<script type="text/javascript">
 		
 		var xmlData;
