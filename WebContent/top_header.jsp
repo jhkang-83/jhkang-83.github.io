@@ -34,13 +34,9 @@
 	<script type="text/javascript" src="/js/sha1.js"></script>
 	<script type="text/javascript" src="/js/security.js"></script>
 	<script type="text/javascript">
-// 		function goIndex(){
-// 			document.location.href = "/loginSupplier";
-// 		}
 		
 		function goOpen4U(){
 			window.open("https://open4u.sk.com");
-			//document.location.href = "https://open4u.sk.com";
 		}
 	</script>
 </head>
