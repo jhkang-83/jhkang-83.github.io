@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<sql-descriptor id="skb/common" data-source="srmDS">
+
+
+    <sql id="select.user.info">
+        <![CDATA[
+     
+            select   TB_USER.SYS_ID as sys_id
+                    ,TB_USER.USR_ID as usr_id
+                    ,TB_USER.COMP_CD as comp_cd
+                    ,TB_USER.USR_NM as usr_nm
+                    ,TB_USER.USR_EN_NM as usr_en_nm
+                    ,TB_USER.USR_CLS as usr_cls
+                    ,TB_USER.JOB_ROLE as job_role
+                    ,TB_USER.JOB_CD as job_cd
+                    ,TB_USER.POS_CD as pos_cd
+                    ,TB_USER.EMP_NO as emp_no
+                    ,TB_USER.PLT_CD as plt_cd
+                    ,TB_USER.DEPT_CD as dept_cd
+                    ,TB_USER.VD_SN as vd_sn
+                    ,TB_USER.MOBILE_NO as mobile_no
+                    ,TB_USER.PHONE_NO as phone_no
+                    ,TB_USER.FAX_NO as fax_no
+                    ,TB_USER.EMAIL as email
+                    ,TB_USER.REM as rem
+                    ,TB_USER.STS as sts
+                    ,TB_USER.PORTAL_CLS as cls
+                    ,TB_VENDOR.VD_GRP as vd_grp
+                    ,TB_USER.DEPT_NM as dept_nm
+                    ,TB_VENDOR.VD_NM_LOC as vd_nm_loc
+              FROM ESAUSER TB_USER, TB_VENDOR TB_VENDOR
+              WHERE TB_USER.USE_YN = 'Y'
+                AND TB_USER.VD_SN = TB_VENDOR.VD_SN(+)
+				AND USR_ID = #usr_id#
+              
+        ]]>
+    </sql>
+    
+    
+    <sql id="select.hr_user.info">
+        <![CDATA[
+     
+            select   TB_USER.SYS_ID as sys_id
+                    ,TB_USER.USR_ID as usr_id
+                    ,TB_USER.COMP_CD as comp_cd
+                    ,TB_USER.USR_NM as usr_nm
+                    ,TB_USER.USR_EN_NM as usr_en_nm
+                    ,TB_USER.USR_CLS as usr_cls
+                    ,TB_USER.EMP_NO as emp_no
+                    ,TB_USER.DEPT_CD as dept_cd
+                    ,TB_DEPT.UP_DEPT_CD as up_dept_cd
+                    ,TB_USER.MOBILE_NO as mobile_no
+                    ,TB_USER.PHONE_NO as phone_no
+                    ,TB_USER.FAX_NO as fax_no
+                    ,TB_USER.EMAIL as email
+                    ,TB_USER.REM as rem
+                    ,TB_USER.STS as sts
+                    ,TB_USER.PORTAL_CLS as cls
+                    ,TB_USER.DEPT_NM as dept_nm
+              FROM ESAUSER TB_USER
+              	LEFT OUTER JOIN ESAOGDP TB_DEPT
+                  ON TB_DEPT.DEPT_CD = TB_USER.DEPT_CD
+              WHERE TB_USER.USE_YN = 'Y'
+				AND USR_ID = #usr_id#
+              
+        ]]>
+    </sql>
+
+    <sql id="select.user.list">
+        <![CDATA[
+     
+            select   SYS_ID as sys_id
+                    ,USR_ID as usr_id
+                    ,COMP_CD as comp_cd
+                    ,USR_NM as usr_nm
+                    ,USR_EN_NM as usr_en_nm
+                    ,USR_CLS as usr_cls
+                    ,JOB_ROLE as job_role
+                    ,JOB_CD as job_cd
+                    ,POS_CD as pos_cd
+                    ,EMP_NO as emp_no
+                    ,PLT_CD as plt_cd
+                    ,DEPT_CD as dept_cd
+                    ,DEPT_NM as usr_dept
+                    ,VD_SN as vd_sn
+                    ,MOBILE_NO as mobile_no
+                    ,PHONE_NO as phone_no
+                    ,FAX_NO as fax_no
+                    ,EMAIL as email
+                    ,REM as rem
+                    ,STS as sts
+                    ,PORTAL_CLS as cls
+                    FROM ESAUSER
+                    WHERE USE_YN = 'Y'
+                    [AND USR_ID = #usr_id#]
+                    [AND USR_NM like '%'||#usr_nm#||'%']
+ 
+              
+        ]]>
+    </sql>
+
+    <sql id="select.code">
+        <![CDATA[
+     
+          SELECT GRP_CD as grp_cd
+	           , DTL_CD as data
+	           , DTL_CD_NM as label
+	           , SORT as sort
+          FROM TB_CODE 
+          WHERE USE_YN='Y'
+          AND GRP_CD = #grp_cd#
+          ORDER BY SORT
+ 
+              
+        ]]>
+    </sql>
+    
+    
+    <!-- 2016.09.19 구매문서저장소 코드조회 AND조건추가 -->
+    <sql id="select.storage_code">
+        <![CDATA[
+     
+          SELECT GRP_CD as grp_cd
+	           , DTL_CD as data
+	           , DTL_CD_NM as label
+	           , GRP_GB_CD as grp_gb_cd
+	           , SORT as sort
+          FROM TB_CODE 
+          WHERE USE_YN='Y'
+          AND GRP_CD = #grp_cd#
+          [AND GRP_GB_CD = #grp_gb_cd#]
+          [AND DTL_CD_NM = #dtl_cd_nm#]
+          ORDER BY SORT
+ 
+              
+        ]]>
+    </sql>
+
+    <!-- 2016.04.27 신규진입 쿼리 수정 -->
+    <sql id="select.summary.newvendor">
+        <![CDATA[
+        select * from (
+            SELECT VDGL.VD_CD as idx,
+			       VDGL.VD_SN,
+			       VDGL.VD_NM_LOC as title,
+			       VDGL.BIZ_REG_NO,
+			       VDGL.REP_NM_LOC,
+			       FC_GET_NAME( 'EMRO', 'ko_KR', 'SKB', 'USER', VDOG.APRV_USR_ID,  '', '', '', '', '')     AS REG_NM,
+			       VDOG.APRV_DATE AS REG_DT
+	          FROM ESMVDGL VDGL, ESMVDOG VDOG
+	         WHERE VDGL.VD_SN = VDOG.VD_SN
+	           AND REG_TYP ='R'
+	           AND TRADSTS ='Y' 
+	           AND STS <>'D'
+	           AND APRV_DATE IS NOT NULL
+			   ORDER BY VDOG.APRV_DATE DESC 
+		)
+	   WHERE ROWNUM <= 4
+	   
+        ]]>
+    </sql>
+    
+    <!-- 2017.02.16 구매문서 저장소 summary 추가 -->
+    <sql id="select.summary.docstorage">
+        <![CDATA[
+     	SELECT * FROM (
+		    SELECT 
+				  TB_SH.IDX as no,
+				  TB_SH.CNTR_GBN as cntr_gbn,
+				  TB_SH.CNTR_DOC_TYPE AS cntr_doc_type,
+				  TB_SH.PR_DOC_TYPE AS pr_doc_type,
+				  TB_SH.CNTR_GBN_GB as cntr_gbn_gb,
+		          TB_SH.CNTR_DOC_TYPE_GB AS cntr_doc_type_gb,
+		          TB_SH.PR_DOC_TYPE_GB AS pr_doc_type_gb,
+				  TB_SH.TITLE AS title,
+				  TB_SH.DRF_DOC_NO AS drf_doc_no,
+				  TB_SD.CONTACT_USER AS user_name,
+				  TB_SH.CREATE_USER AS create_user,
+				  TO_CHAR(TO_DATE( TB_SH.CREATE_DATE, 'YYYYMMDDHH24MISS'), 'YYYY/MM/DD') AS create_date,
+				  TB_SH.UPDATE_USER AS update_user,
+				  TB_SH.UPDATE_DATE AS update_date,
+				  TB_SD.DOC_CONTENTS AS doc_contents,
+				  TB_SD.ATTACH_GROUPCD AS attach_groupcd
+			FROM
+				  DUAL,  
+				  TB_DOC_STORAGE_HEADER TB_SH 
+				  LEFT OUTER JOIN TB_DOC_STORAGE_DETAIL TB_SD
+				    ON TB_SH.IDX = TB_SD.header_idx  
+			WHERE 1=1
+	        ORDER BY TB_SH.CREATE_DATE DESC
+	    )
+	    WHERE ROWNUM <= 4
+              
+        ]]>
+    </sql>
+    
+    <sql id="select.summary.techtrend">
+        <![CDATA[
+     select * from (
+          select p.board_id as board_id
+               , p.post_no as post_no
+               , case when length(p.post_tit) > 18 then substr(p.post_tit,1,18) || '...' else 
+               p.post_tit end as post_title
+               , rownum as seq
+			from ESCBDMA P, ESCBDMC C
+			where P.BOARD_ID = 34
+              AND P.DEL_YN = 'N'
+              AND P.POST_NO = P.POST_GRP_NO
+			  AND P.BOARD_ID = C.BOARD_ID(+)
+			  AND P.CATE_ID = C.CATE_ID(+)
+			order by p.reg_dt desc )
+			  where  ROWNUM <= 4
+              
+        ]]>
+    </sql>
+    
+      <sql id="select.summary.cowork">
+        <![CDATA[
+     select * from (
+          SELECT IDX as idx,
+				  CATEGORY,
+				  case when length(TITLE) > 18 then substr(TITLE,1,18) || '...' else 
+              TITLE end
+				   as title,
+				  STATUS,
+				  CREATE_USER,
+				  CREATE_DATE,
+				  UPDATE_USER,
+				  UPDATE_DATE
+			FROM TB_COWORK_HEADER
+			order by CREATE_DATE desc )
+      where  ROWNUM <= 4
+              
+        ]]>
+    </sql>
+    
+    <sql id="select.summary.notice">
+        <![CDATA[
+        
+SELECT * FROM (
+            SELECT  a.IDX as idx,
+              case when length(a.TITLE) > 18 then substr(a.TITLE,1,18) || '...' else 
+              a.TITLE end
+			         as title,
+			        a.CATEGORY as category,
+			        a.CREATE_USER,
+			        a.UPDATE_USER,
+			        a.OPEN_YN,
+			        a.HITCOUNT
+			FROM TB_NOTICE_HEADER a inner join TB_NOTICE_DETAIL b   on ( a.idx = b.header_idx)
+			WHERE a.OPEN_YN = 'Y'
+			order by b.CREATE_DATE desc )
+		where rownum <= 4
+			
+			
+              
+        ]]>
+    </sql>    
+    
+    
+<!-- 2016/02/02 select조건 추가 수정   -->
+    <sql id="select.summary.bidding">
+        <![CDATA[
+     SELECT * FROM (
+          select   idx as bidding_no
+			     , case when length(title) > 18 then substr(title,1,18) || '...' else 
+              title end as bidding_title
+			     , rownum as seq
+			     , ta.CATEGORY as category
+                 , ta.STATUS as status
+			 from tb_bidding_header ta
+			where status <> 'SAVE'
+			order by create_date desc)
+	WHERE rownum <= 4
+              
+        ]]>
+    </sql>   
+    
+    <sql id="select.summary.reqestimate">
+        <![CDATA[
+     SELECT * FROM (
+          select p.board_id as board_id
+               , p.post_no as post_no
+               , case when length(p.post_tit) > 12 then '［구매］' || substr(p.post_tit,1,12) || '...' else 
+              	 '［구매］' || p.post_tit end as post_title
+               , rownum as seq
+            from ESCBDMA P, ESCBDMC C
+            where P.BOARD_ID = 37
+              AND P.DEL_YN = 'N'
+              AND P.POST_NO = P.POST_GRP_NO
+              AND P.BOARD_ID = C.BOARD_ID(+)
+              AND P.CATE_ID = C.CATE_ID(+)
+            order by p.reg_dt desc )
+      where ROWNUM <= 4
+ 
+        ]]>
+    </sql> 
+      
+    <sql id="select.summary.coopofferestimate">
+        <![CDATA[
+     SELECT * FROM (
+          select p.board_id as board_id
+               , p.post_no as post_no
+               , case when length(p.post_tit) > 12 then '［공동］' || substr(p.post_tit,1,12) || '...' else 
+              	 '［공동］' || p.post_tit end as post_title
+               , rownum as seq
+            from ESCBDMA P, ESCBDMC C
+            where P.BOARD_ID = 41
+              AND P.DEL_YN = 'N'
+              AND P.POST_NO = P.POST_GRP_NO
+              AND P.BOARD_ID = C.BOARD_ID(+)
+              AND P.CATE_ID = C.CATE_ID(+)
+            order by p.reg_dt desc )
+      where ROWNUM <= 4
+ 
+        ]]>
+    </sql>   
+    
+</sql-descriptor> 
+

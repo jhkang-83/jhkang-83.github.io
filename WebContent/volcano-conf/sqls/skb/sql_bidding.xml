@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<sql-descriptor id="skb/bidding" data-source="srmDS">
+
+
+    <sql id="select.bidding.list">
+        <![CDATA[
+   
+            SELECT C.* FROM (
+	    		SELECT ROWNUM AS SEQ, B.* FROM(
+		            SELECT  
+		                    TB_BH.IDX as bidding_no
+		                    ,TB_BH.CATEGORY as category
+		                    ,TB_BH.TITLE as bidding_title
+		                    ,TB_BH.STATUS as status
+		                    ,TO_CHAR(TO_DATE(TB_BH.BIDDING_START_DATE,'YYYY/MM/DD'),'YYYY/MM/DD') || ' ' || TB_BH.BIDDING_START_HH || ':' || TB_BH.BIDDING_START_MM as bidding_start_date
+		                    ,TB_BH.BIDDING_START_HH as start_hh
+		                    ,TB_BH.BIDDING_START_MM as start_mm
+		                    ,TO_CHAR(TO_DATE(TB_BH.BIDDING_END_DATE,'YYYY/MM/DD'),'YYYY/MM/DD') || ' ' || TB_BH.BIDDING_END_HH || ':' || TB_BH.BIDDING_END_MM as bidding_end_date
+		                    ,TB_BH.BIDDING_END_HH as end_hh
+		                    ,TB_BH.BIDDING_END_MM as end_mm
+		                    ,TB_BD.CONTACT_USER as contact_user
+		                    ,TO_CHAR(TB_BH.CREATE_DATE, 'YYYY/MM/DD') as create_date
+		                    ,TB_BH.CREATE_USER as create_user
+		                    ,TB_BH.UPDATE_DATE as update_date
+		                    ,TB_BH.UPDATE_USER as update_user
+		                    ,TB_BD.RFX_TYPE as bidding_rfxtype
+		                    ,TB_CD_CATE.DTL_CD_NM as category_name
+		                    ,TB_CD_STATUS.DTL_CD_NM as status_name
+		                    ,TB_CD_RFX.DTL_CD_NM as bidding_rfxtype_name
+		                    ,TB_BD.CONTACT_DEPARTMENT as dept_nm
+		                    ,(SELECT COUNT(*) FROM TB_BIDDING_APPLICATION WHERE HEADER_IDX = TB_BH.IDX) as appl_cnt
+		            FROM TB_BIDDING_HEADER TB_BH 
+		                LEFT OUTER JOIN TB_BIDDING_DETAIL TB_BD
+		                    ON TB_BH.IDX = TB_BD.HEADER_IDX
+		                LEFT OUTER JOIN TB_CODE TB_CD_CATE
+		                    ON TB_BH.CATEGORY = TB_CD_CATE.DTL_CD
+		                    AND TB_CD_CATE.GRP_CD = 'BIDDING_CATEGORY'
+		                LEFT OUTER JOIN TB_CODE TB_CD_STATUS
+		                    ON TB_BH.STATUS = TB_CD_STATUS.DTL_CD
+		                    AND TB_CD_STATUS.GRP_CD = 'BIDDING_STATUS'
+		                LEFT OUTER JOIN TB_CODE TB_CD_RFX
+		                    ON TB_BD.RFX_TYPE = TB_CD_RFX.DTL_CD
+		                    AND TB_CD_RFX.GRP_CD = 'RFX_TYPE'
+		            WHERE (TB_BH.STATUS <> 'SAVE' OR (TB_BH.STATUS = 'SAVE' AND CREATE_USER = #user_id#)) 
+		            [AND to_char(TB_BH.CREATE_DATE, 'YYYYMMDD') BETWEEN #start_date# AND #end_date#]
+		            [AND TB_BH.TITLE like '%' || #bidding_title# || '%']
+		            [AND TB_BH.STATUS = #bid_status#]
+		            [AND TB_BH.CATEGORY = #category#]
+		            [AND TB_BD.RFX_TYPE = #bid_rfxType#]
+		            ORDER BY TB_BH.CREATE_DATE DESC, TB_BH.IDX DESC
+	            )B
+			)C
+			WHERE 1=1
+			  [AND SEQ BETWEEN #begin# AND #end#]
+        ]]>
+    </sql>
+    
+    <sql id="select.biddinglist.total" comment="biddinglist total">
+    	<![CDATA[
+	    	SELECT COUNT(*) AS TOTAL
+		        FROM
+		            TB_BIDDING_HEADER TB_BH 
+		        INNER JOIN TB_BIDDING_DETAIL TB_BD ON (TB_BH.IDX = TB_BD.HEADER_IDX)
+		        LEFT OUTER JOIN TB_CODE TB_CD_CATE
+		            ON TB_BH.CATEGORY = TB_CD_CATE.DTL_CD
+		            AND TB_CD_CATE.GRP_CD = 'BIDDING_CATEGORY'
+		        LEFT OUTER JOIN TB_CODE TB_CD_STATUS
+		            ON TB_BH.STATUS = TB_CD_STATUS.DTL_CD
+		            AND TB_CD_STATUS.GRP_CD = 'BIDDING_STATUS'
+		        LEFT OUTER JOIN TB_CODE TB_CD_RFX
+		            ON TB_BD.RFX_TYPE = TB_CD_RFX.DTL_CD
+		            AND TB_CD_RFX.GRP_CD = 'RFX_TYPE'
+		        WHERE (TB_BH.STATUS <> 'SAVE' OR (TB_BH.STATUS = 'SAVE' AND CREATE_USER = #user_id#))
+		          [AND TB_BH.TITLE LIKE '%' || #bidding_title# || '%']
+		          [AND TB_CD_CATE.DTL_CD = #category#]
+		          [AND TB_CD_STATUS.DTL_CD = #bid_status#]
+		          [AND TB_CD_RFX.DTL_CD = #bid_rfxType#]
+		          [AND TO_CHAR(TB_BH.CREATE_DATE, 'YYYYMMDD') BETWEEN #start_date# AND #end_date#]
+	        ORDER BY TB_BH.IDX DESC	
+    	]]>
+    </sql>
+
+    <sql id="select.bidding.Detail">
+        <![CDATA[
+        
+            SELECT   TB_BH.IDX as bidding_no
+                    ,TB_BH.CATEGORY as category
+                    ,TB_BH.TITLE as bidding_title
+                    ,TB_BH.STATUS as bid_status
+                    ,TO_CHAR(TO_DATE(TB_BH.BIDDING_START_DATE, 'YYYY/MM/DD'), 'YYYY/MM/DD') AS BIDDING_START_DATE
+                    ,TB_BH.BIDDING_START_HH as start_hh
+                    ,TB_BH.BIDDING_START_MM as start_mm
+                    ,TO_CHAR(TO_DATE(TB_BH.BIDDING_END_DATE, 'YYYY/MM/DD'), 'YYYY/MM/DD') AS BIDDING_END_DATE
+                    ,TB_BH.BIDDING_END_HH as end_hh
+                    ,TB_BH.BIDDING_END_MM as end_mm
+                    ,TB_BD.CONTACT_USER as contact_user
+                    ,TO_CHAR(TB_BH.CREATE_DATE,'YYYY/MM/DD') as create_date
+                    ,TB_BH.CREATE_USER as create_user
+                    ,TB_BH.UPDATE_DATE as update_date
+                    ,TB_BH.UPDATE_USER as update_user
+                    ,TB_BD.RFX_TYPE as bid_rfx_type
+                    ,TB_BD.BIDDING_CONTENTS as bidding_contents   
+                    ,TB_BD.CONTACT_DEPARTMENT as contact_department
+                    ,TB_BD.CONTACT_TEL as contact_tel
+                    ,TB_BD.CONTACT_EMAIL as contact_email
+                    ,TB_BD.BIDDING_RESULT as bidding_result
+                    ,CASE WHEN TB_BD.ATTACH_GROUPCD IS NOT NULL
+                          THEN CRYPTO_AES.ENCRYPT_AES256(TB_BD.ATTACH_GROUPCD) 
+                          ELSE CRYPTO_AES.ENCRYPT_AES256('non')
+                          END as ATTACH_GROUPCD
+                    ,CASE WHEN TB_BD.ATTACH_GROUPCD2 IS NOT NULL 
+                          THEN CRYPTO_AES.ENCRYPT_AES256(ATTACH_GROUPCD2)
+                          ELSE CRYPTO_AES.ENCRYPT_AES256('non')  
+                          END as ATTACH_GROUPCD2
+            FROM TB_BIDDING_HEADER TB_BH 
+                LEFT OUTER JOIN TB_BIDDING_DETAIL TB_BD
+                    ON TB_BH.IDX = TB_BD.HEADER_IDX
+            WHERE 1=1
+            AND TB_BH.IDX = #bidding_no#
+            
+            
+        ]]>
+    </sql>
+    <sql id="select.bidding.Detail.ApplyList">
+        <![CDATA[
+          SELECT  TB_BA.APPLICATION_COMPANY_CODE as application_company
+                 ,TB_BA.APPLICATION_AMOUNT as application_amount
+                 ,TB_BA.APPLICATION_DEPARTMENT as applcation_department
+                 ,TB_BA.APPLICATION_USER as application_user
+                 ,TB_BA.APPLICATION_TEL as application_tel
+                 ,TB_BA.APPLICATION_EMAIL as application_email
+                 ,TB_BA.CHECK_YN as chk_yn
+                 ,TB_BA.CHECK_YN as chk_yn_saved
+                 ,TB_BA.HEADER_IDX as grdbidding_no
+                 ,TB_BA.ATTACH_GROUPCD as attach_groupcd 
+                 ,TB_VD.VD_NM_LOC as application_company_name
+                 ,TO_CHAR(TO_DATE(TB_BA.CREATE_DATE, 'YYYY/MM/DD'), 'YYYY/MM/DD') as application_create_date
+          FROM TB_BIDDING_APPLICATION TB_BA,TB_VENDOR TB_VD  
+           WHERE 1=1
+           AND TB_BA.APPLICATION_COMPANY_CODE = TB_VD.BIZ_REG_NO 
+           AND TB_BA.HEADER_IDX = #bidding_no#
+           
+        ]]>
+    </sql>
+
+
+    <sql id="select.bidding.Application">
+        <![CDATA[
+        
+            SELECT   TB_BH.IDX as bidding_no
+                    ,TB_BH.CATEGORY as category
+                    ,TB_BH.TITLE as bidding_title
+                    ,TB_BH.STATUS as bid_status
+                    ,TB_BH.BIDDING_START_DATE as bidding_start_date
+                    ,TB_BH.BIDDING_START_HH as start_hh
+                    ,TB_BH.BIDDING_START_MM as start_mm
+                    ,TB_BH.BIDDING_END_DATE as bidding_end_date
+                    ,TB_BH.BIDDING_END_HH as end_hh
+                    ,TB_BH.BIDDING_END_MM as end_mm
+                    ,TB_BD.RFX_TYPE as bid_rfx_type
+                    ,TB_BH.UPDATE_DATE as update_date
+                    ,TB_BA.CREATE_DATE as application_create_date
+                    ,TB_BA.APPLICATION_COMPANY_CODE as application_company_code
+                    ,TB_BA.APPLICATION_DEPARTMENT as application_department
+                    ,TB_BA.APPLICATION_USER as application_user
+                    ,TB_BA.APPLICATION_TEL as application_tel
+                    ,TB_BA.APPLICATION_EMAIL as application_email
+                    ,TB_BA.APPLICATION_AMOUNT as application_amount
+                    ,TB_BA.APPLICATION_CONTENTS as application_contents
+                    ,CASE WHEN TB_BA.ATTACH_GROUPCD IS NOT NULL
+                          THEN CRYPTO_AES.ENCRYPT_AES256(TB_BA.ATTACH_GROUPCD) 
+                          ELSE CRYPTO_AES.ENCRYPT_AES256('non')
+                          END as attach_groupcd
+                    ,TB_VD.VD_NM_LOC as application_company_name  
+            FROM TB_BIDDING_HEADER TB_BH 
+		          LEFT OUTER JOIN TB_BIDDING_DETAIL TB_BD
+	                   ON TB_BH.IDX = TB_BD.HEADER_IDX
+                  LEFT OUTER JOIN TB_BIDDING_APPLICATION TB_BA
+	                   ON TB_BH.IDX = TB_BA.HEADER_IDX
+	              LEFT OUTER JOIN TB_VENDOR TB_VD
+                       ON TB_BA.APPLICATION_COMPANY_CODE = TB_VD.BIZ_REG_NO
+			WHERE 1=1
+	        AND TB_BA.APPLICATION_COMPANY_CODE = #company_code#
+            AND TB_BH.IDX = #bidding_no#
+            
+            
+        ]]>
+    </sql>
+
+    <sql id="select.bidding.serverDate">
+        <![CDATA[
+        
+            SELECT   to_char(sysdate,'yyyymmdd hh24:mi') as server_date
+            FROM DUAL
+              
+        ]]>
+    </sql>
+
+    <sql id="select.bidding.idx">
+        <![CDATA[
+        
+            select SEQ_BIDDING.NEXTVAL as v_idx, TO_CHAR(SYSDATE, 'YYYYMMDD') as v_sysdate 
+            from dual
+              
+        ]]>
+    </sql>
+
+    <sql id="insert.bidding.detail" callable="true">
+        <![CDATA[
+     
+            CALL usp_bidding_insert (#bidding_no#,
+                                     #category#,
+                                     #bidding_title#,
+                                     #status#,
+                                     #bidding_start_date#,
+                                     #start_hh#,
+                                     #start_mm#,
+                                     #bidding_end_date#,
+                                     #end_hh#,
+                                     #end_mm#,
+                                     #create_user#,
+                                     #create_date#,
+                                     #create_user#,
+                                     #update_date#,
+                                     #bid_rfx_type#,
+                                     #contact_user#,
+                                     #contact_department#,
+                                     #contact_tel#,
+                                     #contact_email#,
+                                     #bidding_contents#,
+                                     #container_bidding_result#,
+                                     #attach_groupcd#,
+                                     #attach_groupcd2#)
+              
+        ]]>
+    </sql>
+    
+    <sql id="update.bidding.detail" callable="true">
+        <![CDATA[
+     
+            CALL usp_bidding_insert (#bidding_no#,
+                                      #category#,
+                                      #bidding_title#,
+                                      #status#,
+                                      #bidding_start_date#,
+                                      #start_hh#,
+                                      #start_mm#,
+                                      #bidding_end_date#,
+                                      #end_hh#,
+                                      #end_mm#,
+                                      #create_user#,
+                                      #create_date#,
+                                      #update_user#,
+                                      #update_date#,
+                                      #bid_rfx_type#,
+                                      #contact_user#,
+                                      #contact_department#,
+                                      #contact_tel#,
+                                      #contact_email#,
+                                      #bidding_contents#,
+                                      #container_bidding_result#,
+                                      #attach_groupcd#,
+                                      #attach_groupcd2#
+                                      )
+              
+        ]]>
+    </sql>
+
+    <sql id="insert.bidding.application" callable="true">
+        <![CDATA[
+            
+            CALL usp_bidding_application_insert(#bidding_no#,
+                                                #application_company_code#,
+                                                #application_user#,
+                                                #application_department#,
+                                                #application_tel#,
+                                                #application_email#,
+                                                #application_amount#,
+                                                #application_contents#,
+                                                #create_user_id#,
+                                                #create_user_id#,
+	                                            #attach_groupcd#
+			                                     )
+                  
+        ]]>
+    </sql>
+
+    <sql id="update.bidding.init.applier" callable="true">
+        <![CDATA[
+            
+            CALL usp_bidding_applier_update_n(#bidding_no#)
+                  
+        ]]>
+    </sql>
+
+    <sql id="update.bidding.select.applier" callable="true">
+        <![CDATA[
+            
+            CALL usp_bidding_applier_update_y(#bidding_no#,#application_company#)
+                  
+        ]]>
+    </sql>
+    
+    <sql id="update.bidding.stop" >
+        <![CDATA[
+            
+            UPDATE TB_BIDDING_HEADER SET STATUS = 'SAVE' WHERE IDX = #bidding_no#
+                  
+        ]]>
+    </sql>
+    
+    <sql id="update.bidding.status.endfail" >
+        <![CDATA[
+            
+            UPDATE TB_BIDDING_HEADER SET STATUS = 'END_FAIL' WHERE IDX = #bidding_no#
+                  
+        ]]>
+    </sql>
+    
+    <sql id="update.bidding.status.endselect" >
+        <![CDATA[
+            
+            UPDATE TB_BIDDING_HEADER SET STATUS = 'END_SELECT' WHERE IDX = #bidding_no#
+                  
+        ]]>
+    </sql>
+    
+    <sql id="update.bidding.contents.update" >
+        <![CDATA[
+            
+            UPDATE TB_BIDDING_DETAIL SET BIDDING_RESULT = #bidding_result# WHERE HEADER_IDX = #bidding_no#
+                  
+        ]]>
+    </sql>
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+
+
+
+	<sql id="get.session.info" comment="">
+        <![CDATA[
+           SELECT    CASE WHEN #leader_flag# = 'Y'
+                               THEN #purc_grp_cd#
+                          ELSE (SELECT JBPS.PURC_GRP_CD
+			                      FROM ESMJBPS JBPS
+			                     WHERE JBPS.SYS_ID       = AUSR.SYS_ID
+			                       AND JBPS.PURC_GRP_TYP = 'PU'
+			                       AND JBPS.COMP_CD      = AUSR.COMP_CD
+			                       AND JBPS.USR_ID       = AUSR.USR_ID
+			                       AND JBPS.USE_YN       = 'Y'
+			                       AND ROWNUM            = 1           ) 
+			           END AS PURC_GRP_CD
+                    , CASE WHEN #leader_flag# = 'Y'
+                               THEN #purc_grp_nm#
+                          ELSE (SELECT FC_GET_NAME(#sys_id#,#locale#,#s_comp_cd#, 'PURC_GRP', 'PU'
+				                            , (SELECT JBPS.PURC_GRP_CD
+				                                 FROM ESMJBPS JBPS
+				                                WHERE JBPS.SYS_ID       = AUSR.SYS_ID
+				                                  AND JBPS.COMP_CD      = AUSR.COMP_CD
+				                                  AND JBPS.PURC_GRP_TYP = 'PU'
+				                                  AND JBPS.USR_ID       = AUSR.USR_ID
+				                                  AND JBPS.USE_YN       = 'Y'
+				                                  AND ROWNUM            = 1)
+				                            ,''
+				                            ,''
+				                            ,''
+				                            ,'') FROM DUAL
+				                      )  
+				        END AS  PURC_GRP_NM
+            FROM  ESAUSER AUSR
+            WHERE AUSR.SYS_ID  = #sys_id# 
+              AND AUSR.COMP_CD = #comp_cd# 
+              AND AUSR.USR_ID  = #usr_id# 
+        ]]>
+    </sql>
+
+    
+</sql-descriptor> 
+
