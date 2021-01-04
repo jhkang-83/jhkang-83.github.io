@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<sql-descriptor id="skb/prstatus" data-source="srmDS">
+
+
+    <sql id="insert.temp.excel.item" comment="품의List 엑셀 업로드">
+        <![CDATA[
+            INSERT INTO TB_PR_STATUS_EXCELUPLOAD
+					(
+						SEQ,
+						APPROVAL_DATE,    -- 품의결재일
+						DOC_NO,           -- 문서번호
+						APPROVAL_TITLE,   -- 품의명
+						BUDGET_CLS_NM,    -- capex/opex
+						CHARGE_NAME,      -- 담당자
+						APPROVAL_NAME,    -- 결재자
+						AMOUNT,           -- 금액
+						PURC_GRP_NM,      -- 구매담당자
+						DEPT_CD,          -- 부서코드
+						DEPT_NM           -- 담당부서
+					)
+					VALUES(
+					   #seq#,
+					   TRIM( REPLACE( TO_CHAR(TO_DATE(#품의결재일#, 'YYYYMMDD'), 'YYYY/MM/DD'), 'null', '' ) ),
+					   TRIM( REPLACE( #문서번호#, 'null', '' ) ),
+					   TRIM( REPLACE( #품의명#, 'null', '' ) ),
+					   TRIM( REPLACE( #Capex/Opex#, 'null', '' ) ),
+					   TRIM( REPLACE( #담당자#, 'null', '' ) ),
+					   TRIM( REPLACE( #결재자#, 'null', '' ) ),
+					   TRIM( REPLACE( #금액#, 'null', '' ) ),
+					   TRIM( REPLACE( #구매담당자#, 'null', '' ) ),
+					   TRIM( REPLACE( #담당부서코드#, 'null', '' ) ),
+					   TRIM( REPLACE( #담당부서#, 'null', '' ) )
+					) 
+        ]]>
+    </sql>
+    
+    <sql id="insert.excel.valid.item" comment="품의List 저장">
+        <![CDATA[
+            INSERT INTO TB_PR_STATUS_HEADER
+					(
+						IDX,              -- 인덱스
+						APPROVAL_DATE,    -- 품의결재일
+						DOC_NO,           -- 문서번호
+						APPROVAL_TITLE,   -- 품의명
+						BUDGET_CLS_NM,    -- capex/opex
+						DEPT_CD,          -- 담당부서코드
+						DEPT_NM,          -- 담당부서명
+						CHARGE_NAME,      -- 담당자
+						APPROVAL_NAME,    -- 결재자
+						AMOUNT,           -- 금액
+						PURC_GRP_NM,      -- 구매담당자
+						ATTACH_YN,        -- 구매내역서 첨부
+						PR_STATUS,        -- 구매검토(진행상태)
+						PR_STATUS_CD,     -- 진행상태 코드
+						ATTACH_GROUPCD,   -- 첨부파일위치 코드
+						CREATE_DATE,      -- 등록일자
+                        CREATE_USER       -- 등록자
+					)
+					VALUES(
+					   #seq#,
+					   TRIM( REPLACE( #approval_date#, 'null', '' ) ),
+					   TRIM( REPLACE( #doc_no#, 'null', '' ) ),
+					   TRIM( REPLACE( #approval_title#, 'null', '' ) ),
+					   TRIM( REPLACE( #budget_cls_nm#, 'null', '' ) ),
+					   TRIM( REPLACE( #dept_cd#, 'null', '' ) ),
+					   TRIM( REPLACE( #dept_nm#, 'null', '' ) ),
+					   TRIM( REPLACE( #charge_name#, 'null', '' ) ),
+					   TRIM( REPLACE( #approval_name#, 'null', '' ) ),
+					   TRIM( REPLACE( #amount#, 'null', '' ) ),
+					   TRIM( REPLACE( #purc_grp_nm#, 'null', '' ) ),
+					   TRIM( REPLACE( #attach_yn#, 'null', '' ) ),
+					   #pr_status#,
+					   #pr_status_cd#,
+					   #grp_cd#,
+					   TO_CHAR(SYSDATE,'YYYYMMDDHH24MISS'),
+					   #create_user#
+					) 
+        ]]>
+    </sql>
+    
+    <sql id="insert.prstatusDetail" comment="품의서 Detail 저장">
+        <![CDATA[
+            INSERT INTO TB_PR_STATUS_DETAIL
+					(
+						HEADER_IDX,
+						ATTACH_GROUPCD,
+						CREATE_DATE,
+						CREATE_USER,
+						UPDATE_DATE,
+						UPDATE_USER
+					)
+					VALUES(
+					   #seq#,
+					   #grp_cd#,
+					   TO_CHAR(SYSDATE,'YYYYMMDDHH24MISS'),
+					   #create_user#,
+					   TO_CHAR(SYSDATE,'YYYYMMDDHH24MISS'),
+					   #update_user#
+					) 
+        ]]>
+    </sql>
+    
+    <sql id="insert.attachSeq" comment="첨부파일 시퀀스 저장">
+        <![CDATA[
+            INSERT INTO TB_PR_STATUS_ATTACH
+					(
+						HEADER_IDX,
+						FILE_IDX,
+						FILE_SEQ,
+						DISPLAY_FILE_NAME,
+						UPLOAD_FILE_LOCATION
+					)
+					VALUES(
+					   #seq#,
+					   #file_idx#,
+					   #att_seq#,
+					   #orgn_file_nm#,
+					   #grp_cd#
+					) 
+        ]]>
+    </sql>
+    
+    <sql id="update.approv.list" comment="품의List 업데이트">
+        <![CDATA[
+            UPDATE TB_PR_STATUS_HEADER
+			     SET
+			         APPROVAL_DATE = #approval_date#,    -- 품의결재일
+                     DOC_NO = #doc_no#,                  -- 문서번호
+                     APPROVAL_TITLE = #approval_title#,  -- 품의명
+                     BUDGET_CLS_NM = #budget_cls_nm#,    -- capex/opex
+                     DEPT_CD = #dept_cd#,                -- 담당부서코드
+                     DEPT_NM = #dept_nm#,                -- 담당부서명
+                     CHARGE_NAME = #charge_name#,        -- 담당자
+                     APPROVAL_NAME = #approval_name#,    -- 결재자
+                     AMOUNT = #amount#,                  -- 금액
+                     PURC_GRP_NM = #purc_grp_nm#,        -- 구매담당자
+                     ATTACH_YN = #attach_yn#,            -- 구매내역서 첨부
+                     PR_STATUS = #pr_status#,            -- 구매검토(진행상태)
+                     PR_STATUS_CD = #pr_status_cd#,      -- 진행상태 코드
+                     ATTACH_GROUPCD = #attach_groupcd#   -- 첨부파일위치 코드
+                  WHERE
+                    IDX = #no#
+        ]]>
+    </sql>
+    
+    <sql id="delete.temp.excel.item" comment="품의List 엑셀업로드 삭제">
+        <![CDATA[
+            DELETE TB_PR_STATUS_EXCELUPLOAD 
+        ]]>
+    </sql>
+
+      
+    <sql id="select.temp.excel.item" comment="품의List 조회">
+        <![CDATA[
+            SELECT 
+                   NVL(APPROVAL_DATE, ' ') APPROVAL_DATE,    -- 품의결재일
+                   NVL(DOC_NO,' ') DOC_NO,           -- 문서번호
+                   NVL(APPROVAL_TITLE, ' ') APPROVAL_TITLE,   -- 품의명
+                   NVL(BUDGET_CLS_NM,' ') BUDGET_CLS_NM,    -- capex/opex
+                   NVL(CHARGE_NAME, ' ') CHARGE_NAME,    -- 담당자
+                   NVL(APPROVAL_NAME, ' ') APPROVAL_NAME,   -- 결재자
+                   NVL(TRIM(TO_CHAR(AMOUNT, '999,999,999,999')), ' ') AMOUNT,          -- 금액
+                   NVL(PURC_GRP_NM, ' ') PURC_GRP_NM,     -- 구매담당자
+                   ATTACH_YN,        -- 구매내역서 첨부
+                   PR_STATUS,        -- 구매검토(진행상태)
+                   NVL(DEPT_CD, ' ') DEPT_CD,         -- 부서코드
+                   NVL(DEPT_NM, ' ')  DEPT_NM         -- 담당부서
+            FROM TB_PR_STATUS_EXCELUPLOAD
+            WHERE 1=1
+            ORDER BY APPROVAL_DATE ASC
+        ]]>
+    </sql>
+        
+    <sql id="select.excel.invalid.item" comment="품의List 조회">
+        <![CDATA[
+            SELECT IDX,              -- 인덱스
+                   APPROVAL_DATE,    -- 품의결재일
+                   DOC_NO,           -- 문서번호
+                   APPROVAL_TITLE,   -- 품의명
+                   BUDGET_CLS_NM,    -- capex/opex
+                   DEPT_CD,          -- 담당부서코드
+                   DEPT_NM,          -- 담당부서명
+                   CHARGE_NAME,      -- 담당자
+                   APPROVAL_NAME,    -- 결재자
+                   AMOUNT,           -- 금액
+                   PURC_GRP_NM,      -- 구매담당자
+                   ATTACH_YN,        -- 구매내역서 첨부
+                   PR_STATUS,        -- 구매검토(진행상태)
+                   PR_STATUS_CD,     -- 진행상태 코드
+                   ATTACH_GROUPCD,   -- 첨부파일위치 코드
+                   CREATE_DATE,      -- 등록일자
+                   CREATE_USER       -- 등록자
+            FROM TB_PR_STATUS_HEADER
+            WHERE 1=1
+        ]]>
+    </sql>
+    
+    <sql id="select.prstatus.idx" comment="품의List 시퀀스 조회">
+        <![CDATA[
+            SELECT SEQ_PRSTATUS.NEXTVAL AS SEQ
+            FROM DUAL
+        ]]>
+    </sql>
+    
+    <sql id="select.attach.idx" comment="첨부파일 시퀀스 조회">
+        <![CDATA[
+            SELECT SEQ_PRSTATUS_ATTACH.NEXTVAL AS SEQ
+            FROM DUAL
+        ]]>
+    </sql>
+    
+    <sql id="select.prstatus.list" comment="구매지원현황 List 조회">
+        <![CDATA[
+            SELECT C.* FROM(
+            	SELECT ROWNUM SEQ, B.* FROM (
+		            SELECT
+					    TB_PH.IDX AS no,
+					    TB_PH.APPROVAL_DATE AS approval_date,    -- 품의결재일
+					    TB_PH.DOC_NO AS doc_no,                  -- 문서번호
+					    TB_PH.APPROVAL_TITLE AS approval_title,  -- 품의명
+					    TB_PH.BUDGET_CLS_NM AS budget_cls_nm,    -- capex/Opex
+					    TB_PH.AMOUNT AS amount,                  -- 금액
+					    TB_PH.DEPT_CD AS dept_cd,                -- 담당부서코드 
+					    TB_PH.DEPT_NM AS dept_nm,                -- 담당부서명 
+					    TB_PH.CHARGE_NAME AS charge_name,        -- 담당자  
+					    TB_PH.APPROVAL_NAME AS approval_name,    -- 결재자
+					    TB_PH.PURC_GRP_NM AS purc_grp_nm,        -- 구매담당자
+					    TB_PH.ATTACH_YN AS attach_yn,            -- 구매내역서 첨부
+					    TB_PSC.DTL_CD_NM AS pr_status,           -- 진행상태코드명
+					    TB_PSC.DTL_CD AS pr_status_cd,           -- 진행상태코드
+					    TB_PSC.GRP_GB_CD AS grp_gb_cd,           -- 진행상태 그룹코드
+					    TB_PSC.SORT AS sort,
+					    CASE WHEN TB_PH.ATTACH_GROUPCD IS NOT NULL
+					           THEN CRYPTO_AES.ENCRYPT_AES256(TB_PH.ATTACH_GROUPCD)
+					           ELSE CRYPTO_AES.ENCRYPT_AES256('non')
+					           END as attach_groupcd
+					  FROM TB_PR_STATUS_HEADER TB_PH
+					    LEFT OUTER JOIN TB_PRSTATUS_CODE TB_PSC
+					      ON TB_PH.PR_STATUS_CD = TB_PSC.DTL_CD
+					  WHERE 1=1
+					     [AND TB_PH.APPROVAL_TITLE LIKE '%' || #approval_title# || '%']
+					     [AND TB_PH.CHARGE_NAME LIKE '%' || #charge_name# || '%']
+					     [AND TB_PH.PURC_GRP_NM LIKE '%' || #purc_grp_nm# || '%']
+					     [AND TB_PH.DOC_NO LIKE '%' || #doc_no# || '%']
+					     [AND TB_PSC.GRP_GB_CD = #prsts_gb#]
+					     [AND TB_PH.DEPT_CD LIKE #dept_cd# || '%']
+					     [AND TB_PSC.GRP_GB_CD != #grp_gb_cd#]
+					     [AND TB_PSC.GRP_GB_CD != #del_pr_cd#]
+					 ORDER BY TB_PH.IDX DESC, TB_PH.APPROVAL_DATE DESC
+				)B
+			)C
+			WHERE
+			  1=1
+			   AND SEQ BETWEEN #begin# AND #end#
+        ]]>
+    </sql>
+    <sql id="select.prstatus.code" comment="구매지원현황 진행상태 코드 조회">
+        <![CDATA[
+            SELECT GRP_CD as grp_cd
+			      , DTL_CD as data
+			      , DTL_CD_NM as pr_status
+			      , GRP_GB_CD as grp_gb_cd
+			      , SORT as sort
+			  FROM TB_PRSTATUS_CODE
+			  WHERE USE_YN='Y'
+              AND GRP_CD = #grp_cd#
+              ORDER BY SORT
+        ]]>
+    </sql>
+    
+    <sql id="select.deptCode.info" comment="구매지원현황 부서코드 조회">
+        <![CDATA[
+            SELECT DISTINCT 
+			       DEPT_CD 
+			     , DEPT_NM 
+			  FROM ESAOGDP 
+			  WHERE USE_YN='Y'
+        ]]>
+    </sql>
+    
+    <sql id="delete.prStatus.List" comment="품의List 삭제">
+        <![CDATA[
+            DELETE TB_PR_STATUS_HEADER
+			  WHERE IDX=#no#
+			    AND DOC_NO = #doc_no#
+        ]]>
+    </sql>
+    
+    <sql id="delete.prStatus.Attach" comment="품의List 첨부파일 삭제">
+        <![CDATA[
+            DELETE TB_PR_STATUS_ATTACH
+			  WHERE FILE_IDX=#no#
+			    AND UPLOAD_FILE_LOCATION = #grp_cd#
+        ]]>
+    </sql>
+    
+    <sql id="prlist.select.total" comment="품의List total">     
+        <![CDATA[
+     
+        SELECT count(*) as total         
+                FROM TB_PR_STATUS_HEADER TB_PH
+					    LEFT OUTER JOIN TB_PRSTATUS_CODE TB_PSC
+					      ON TB_PH.PR_STATUS_CD = TB_PSC.DTL_CD
+                  where  1=1 
+                  [AND TB_PH.APPROVAL_TITLE LIKE '%' || #approval_title# || '%']
+			      [AND TB_PH.CHARGE_NAME LIKE '%' || #charge_name# || '%']
+			      [AND TB_PH.PURC_GRP_NM LIKE '%' || #purc_grp_nm# || '%']
+			      [AND TB_PH.DOC_NO LIKE '%' || #doc_no# || '%']
+			      [AND TB_PSC.GRP_GB_CD = #prsts_gb#]
+			      [AND TB_PH.DEPT_CD LIKE #dept_cd# || '%']
+			      [AND TB_PSC.GRP_GB_CD != #grp_gb_cd#]
+			      [AND TB_PSC.GRP_GB_CD != #del_pr_cd#]
+                  order by APPROVAL_DATE DESC
+        
+        ]]> 
+    </sql> 
+</sql-descriptor> 
+

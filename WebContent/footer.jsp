@@ -2,9 +2,9 @@
 	<footer>
 			<div id="footerCon1" class="footerMenus">
 				<ul>
-					<li><a class="footerLink" href=""> 이용약관 </a></li>
+					<li><a class="footerLink" href="javascript:pop_condition();"> 이용약관 </a></li>
 					<li>시스템 문의</li>
-					<li>Mail : jhkang@partner.sk.com</li>
+					<li>Mail : jhkim2956@partner.sk.com</li>
 				</ul>
 			</div>
 
