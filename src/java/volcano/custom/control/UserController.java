@@ -7,7 +7,9 @@ import eswf.exception.FoundationException;
 import eswf.jdbc.JdbcAgency;
 import eswf.managers.TransactionManager;
 
-
+/*
+ * 아이디/패스워드 찾기 화면에서 사용자 정보 조회
+ */
 public class UserController {
 	private int pwdLength = 10;
 	private final char[] passwordTable = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 

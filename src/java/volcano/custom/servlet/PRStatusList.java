@@ -22,31 +22,32 @@ import volcano.custom.control.SearchCodeController;
 
 /**
  * Servlet implementation class PRStatusList
+ * 선제적구매지원현황 리스트
  */
 @WebServlet("/bw/emPRStatusList")
 public class PRStatusList extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-    
+
 	protected SearchCodeController searchCode = new SearchCodeController();
 	protected List<Map> prStatusCode = null;
 	protected List<Map> prStatusDetailCD = null;
-	
+
     /**
      * @see HttpServlet#HttpServlet()
      */
     public PRStatusList() {
         super();
         // TODO Auto-generated constructor stub
-        
+
         try {
-			prStatusCode = searchCode.getCode("skb/common", "select.code", "grp_cd", "PR_STATUS");
-			prStatusDetailCD = searchCode.getCode("skb/prstatus", "select.prstatus.code", "grp_cd", "PR_STATUS");
-		} catch (Exception e) {
+					prStatusCode = searchCode.getCode("skb/common", "select.code", "grp_cd", "PR_STATUS");
+					prStatusDetailCD = searchCode.getCode("skb/prstatus", "select.prstatus.code", "grp_cd", "PR_STATUS");
+				} catch (Exception e) {
 			// TODO: handle exception
-		}
+				}
     }
-    
-    
+
+
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
@@ -55,34 +56,34 @@ public class PRStatusList extends HttpServlet {
 		// TODO Auto-generated method stub
 		request.setCharacterEncoding("UTF-8");
 		response.setContentType("text/html charset=UTF-8");
-		
+
 		Map<String, Object> param = new eswf.dataobject.Map();
 		String userId = "";
 		Map<String, Object> userInfo = null;
 		List<Map> listMap = null;
 		Map<String, Integer> totalMap = new HashMap<String, Integer>();
-		
+
 		int begin = 1;
 		int end = 15;
 		int currentPage = 1;
 		String selectedPRStatusCD = "";
 		String mode = "";
 		String changeWriteMode = "view";
-		
+
 		TransactionManager.getInstance().transact();
-		
+
 		try {
 			JdbcAgency jdbc = new JdbcAgency();
 			jdbc.setDefaults(ConfigUtils.getVirtualSessionUser());
-			
+
 			Helper helper = new Helper(request, new eswf.dataobject.Map());
 			if(helper != null) {
 				userId = (String) helper.getUser().get("usr_id");
 				param.put("usr_id", userId);
 			}
-			
+
 			userInfo = jdbc.executeQuery("skb/common", "select.hr_user.info", param);
-			
+
 			if(request.getParameter("approval_title") != null) {
 				param.put("approval_title", request.getParameter("approval_title"));
 			}
@@ -99,40 +100,38 @@ public class PRStatusList extends HttpServlet {
 				param.put("prsts_gb", request.getParameter("prsts_gb"));
 				selectedPRStatusCD = request.getParameter("prsts_gb");
 			}
-			
-			System.out.println("role_lis >>>" + helper.getUser().get("role_list"));
+
 			if(helper.getUser().get("role_list").equals("WORKER") || helper.getUser().get("role_list").equals("WORKER2") ||  helper.getUser().get("role_list").equals("DO") || helper.getUser().get("role_list").equals("CONSCADMIN,WORKER")) {
 				param.put("dept_cd", userInfo.get("dept_cd"));
 				param.put("grp_gb_cd", "CONT_END");
 				param.put("del_pr_cd", "DEL_PR");
 			}
-			
+
 			if(request.getParameter("startRow") != null && !"0".equals(request.getParameter("startRow")))
 			{
 				begin = Integer.parseInt(request.getParameter("startRow"));
 			}
-			
+
 			if(request.getParameter("endRow") != null && !"0".equals(request.getParameter("endRow")))
 			{
 				end = Integer.parseInt(request.getParameter("endRow"));
 			}
-			
+
 			if(request.getParameter("currentPage") != null && !"0".equals(request.getParameter("currentPage")))
 			{
 				currentPage = Integer.parseInt(request.getParameter("currentPage"));
 			}
-			
+
 			if(request.getParameter("changeWriteMode") != null) {
 				changeWriteMode = request.getParameter("changeWriteMode");
 			}
-			
+
 			param.put("begin", begin);
 			param.put("end", end);
-			
+
 			listMap = jdbc.executeQueryList("skb/prstatus", "select.prstatus.list", param);
 			totalMap = jdbc.executeQuery("skb/prstatus", "prlist.select.total", param);
-			
-			System.out.println("changeWriteMode >>>" + changeWriteMode);
+
 			request.setAttribute("changeWriteMode", changeWriteMode);
 			request.setAttribute("selectedPRStatusCD", selectedPRStatusCD);
 			request.setAttribute("resultList", listMap);
@@ -142,12 +141,12 @@ public class PRStatusList extends HttpServlet {
 			request.setAttribute("currentPage", currentPage);
 			request.setAttribute("prStatusCode", prStatusCode);
 			request.setAttribute("prStatusDetailCD", prStatusDetailCD);
-			
+
 			RequestDispatcher rd = request.getRequestDispatcher("/modules/bp/skb/esPRStatusList.jsp");
 			rd.forward(request, response);
-			
+
 			TransactionManager.getInstance().accept();
-			
+
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
@@ -160,7 +159,7 @@ public class PRStatusList extends HttpServlet {
 		}finally {
 			TransactionManager.getInstance().removeSession();
 		}
-		
+
 	}
 
 	/**
@@ -170,12 +169,13 @@ public class PRStatusList extends HttpServlet {
 		// TODO Auto-generated method stub
 		request.setCharacterEncoding("UTF-8");
 		if(request.getParameter("mode").equals("save")) {
+			//저장시
 			doUpdate(request, response);
 		}else {
 			doGet(request, response);
 		}
 	}
-	
+
 	protected void doUpdate(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String no[] = request.getParameterValues("no");
 		String approval_date[] = request.getParameterValues("approval_date");
@@ -192,15 +192,15 @@ public class PRStatusList extends HttpServlet {
 		String budget_cls_nm[] = request.getParameterValues("budget_cls_nm");
 		String attach_yn[] = request.getParameterValues("attach_yn");
 		String message = "";
-		
+
 		TransactionManager.getInstance().transact();
 		response.setContentType("text/html; charset=UTF-8");
-		
+
 		try {
 			JdbcAgency jdbc = new JdbcAgency();
 			jdbc.setDefaults(ConfigUtils.getVirtualSessionUser());
 			jdbc.executeUpdate("skb/prstatus", "delete.temp.excel.item", null);
-			
+
 			for(int i = 0; i < no.length; i++) {
 				Map<String, Object> param = new eswf.dataobject.Map();
 				param.put("no", no[i]);
@@ -217,16 +217,15 @@ public class PRStatusList extends HttpServlet {
 				param.put("approval_name", approval_name[i]);
 				param.put("budget_cls_nm", budget_cls_nm[i]);
 				param.put("attach_yn", attach_yn[i]);
-				
+
 				jdbc.executeUpdate("skb/prstatus", "update.approv.list", param);
 			}
-			
+
 			message = "수정 되었습니다.";
-					
+
 			response.getWriter().write(message);
 			response.getWriter().flush();
-			
-			System.out.println(no[0]);
+
 			TransactionManager.getInstance().accept();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -241,8 +240,8 @@ public class PRStatusList extends HttpServlet {
 		}finally {
 			TransactionManager.getInstance().removeSession();
 		}
-		
+
 	}
-	
+
 
 }

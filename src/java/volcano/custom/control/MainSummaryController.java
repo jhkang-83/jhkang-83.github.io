@@ -1,5 +1,7 @@
 package volcano.custom.control;
 
+//메인화면 게시글 바로가기 summary
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

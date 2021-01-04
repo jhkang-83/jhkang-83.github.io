@@ -23,12 +23,13 @@ import flex.messaging.util.URLEncoder;
 
 /**
  * Servlet implementation class FindUserID
+ * 아이디 찾기
  */
 
-@WebServlet(name="FindUserId", urlPatterns= {"/findUserId.do"})
+@WebServlet("/findUserId")
 public class FindUserID extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-       
+
     /**
      * @see HttpServlet#HttpServlet()
      */
@@ -37,17 +38,17 @@ public class FindUserID extends HttpServlet {
    protected String chr_email;
    protected String send_email;
    private static String result = "";
-   
+
    private String host;
    private String port;
    private String user;
    private String pass;
-   
+
 	public FindUserID() {
         super();
         // TODO Auto-generated constructor stub
     }
-	
+
 	public void init(){
 		ServletContext context = getServletContext();
 		host = context.getInitParameter("host");
@@ -73,29 +74,29 @@ public class FindUserID extends HttpServlet {
 		this.usr_name = request.getParameter("chrName");
 		this.biz_reg_no = request.getParameter("bizRegNo");
 //		this.chr_email = request.getParameter("chrEmail");
-		
+
 		String usr_id = null;
 		Map<String, Object> param = new HashMap<String, Object>();
 		Map<String, Object> map;
-		
+
 		System.out.println("usr_name >>>>>" + this.usr_name);
-		
+
 		param.put("usr_nm", usr_name);
 		param.put("vd_sn", biz_reg_no);
 //		param.put("email", chr_email);
-		
+
 		TransactionManager.getInstance().transact();
 		response.setContentType("text/html; charset=UTF-8");
-		
+
 		try{
 			JdbcAgency jdbc = new JdbcAgency();
-			
+
 			map = jdbc.executeQuery("admin/user", "select.user.findId", param);
-			
+
 			if(map == null)
 			{
 				result = "가입된 정보가 존재하지 않거나 일치하지 않습니다.";
-				
+
 			}else
 			{
 				usr_id = (String)map.get("usr_id");
@@ -103,28 +104,28 @@ public class FindUserID extends HttpServlet {
 				send_email = (String)map.get("send_email");
 				sendMail(usr_id);
 			}
-			
+
 			URLEncoder.encode(result, "UTF-8");
 			response.getWriter().write(result);
 			response.getWriter().flush();
 		}catch(Exception e){
 //			e.printStackTrace();
 		}
-		
+
 		System.out.println("result >>>>>" + result);
 	}
-	
+
 	protected void sendMail(String usr_id) throws ServletException, IOException {
 		String subject = "[SKB 구매포탈(Withpro)시스템] 회원 아이디 안내";
 		String text1 = "회원 가입시 등록된 이메일 "+"\n";
 		String text2 ="로 아이디를 메일 발송 하였습니다.";
 		String content1 = "안녕하세요. SK브로드밴드 구매포탈시스템 입니다."+"<br><br>";
 		String content2 = "[" +usr_name + "]"+ "님의 요청으로 아래와 같이 ID 조회하여 안내드립니다."+"<br><br>";
-		String content3 = "시스템 문의: jhkang@partner.sk.com" + "<br><br><br>" +
+		String content3 = "시스템 문의: jhkim2956@partner.sk.com" + "<br><br><br>" +
 							"* 본 메일은 발신 전용 메일로, 회신되지 않습니다.";
-		
+
 		String content = content1 + content2 + "<b>" + usr_id + "</b><br><br>" + content3;
-		
+
 		try {
 			EmailUtility.sendMail(host, port, user, pass, send_email, subject, content);
 			result = text1 + chr_email + text2;
@@ -134,6 +135,6 @@ public class FindUserID extends HttpServlet {
 			e.printStackTrace();
 		}
 	}
-	
+
 
 }

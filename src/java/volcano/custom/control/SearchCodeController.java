@@ -6,7 +6,7 @@ import java.util.Map;
 import eswf.exception.FoundationException;
 import eswf.jdbc.JdbcAgency;
 import eswf.managers.TransactionManager;
-
+//코드조회 컨트롤
 public class SearchCodeController {
 	
 	protected JdbcAgency jdbc = null;

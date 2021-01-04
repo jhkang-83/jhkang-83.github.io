@@ -20,11 +20,12 @@ import volcano.custom.control.SearchCodeController;
 
 /**
  * Servlet implementation class PRStatusWrite
+ * 선제적구매지원현황 작성
  */
 @WebServlet("/bw/emPRStatusWrite")
 public class PRStatusWrite extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-    
+
 	protected SearchCodeController searchCode = new SearchCodeController();
 	protected List<Map> prStatusDetailCD = null;
 	/**
@@ -33,13 +34,13 @@ public class PRStatusWrite extends HttpServlet {
     public PRStatusWrite() {
         super();
         // TODO Auto-generated constructor stub
-        
+
         try {
-			prStatusDetailCD = searchCode.getCode("skb/prstatus", "select.prstatus.code", "grp_cd", "PR_STATUS");
-		} catch (FoundationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+					prStatusDetailCD = searchCode.getCode("skb/prstatus", "select.prstatus.code", "grp_cd", "PR_STATUS");
+				} catch (FoundationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
     }
 
 	/**
@@ -49,9 +50,9 @@ public class PRStatusWrite extends HttpServlet {
 		// TODO Auto-generated method stub
 		request.setCharacterEncoding("UTF-8");
 		response.setContentType("text/html charset=UTF-8");
-		
+
 		TransactionManager.getInstance().transact();
-		
+
 		try {
 			request.setAttribute("prStatusCD", prStatusDetailCD);
 			RequestDispatcher rd = request.getRequestDispatcher("/modules/bp/skb/esPRStatusWrite.jsp");

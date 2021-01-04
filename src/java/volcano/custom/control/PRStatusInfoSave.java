@@ -24,11 +24,12 @@ import eswf.util.ConfigUtils;
 
 /**
  * Servlet implementation class PRStatusInfoSave
+ * 선제적구매지원현황 저장
  */
 @WebServlet("/bw/prStatusInfoSave")
 public class PRStatusInfoSave extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-       
+
     /**
      * @see HttpServlet#HttpServlet()
      */
@@ -46,40 +47,40 @@ public class PRStatusInfoSave extends HttpServlet {
 		response.setContentType("text/html charset=UTF-8");
 		Map<String, Object> param =  param = new HashMap<String, Object>();
 		Map<String, Object> resultSeq = null;
-		
+
 		JSONObject resultJson = new JSONObject();
 		String status= "";
 		String errMsg = "";
 		String message = "";
 		String userId = "";
-		
+
 		TransactionManager.getInstance().transact();
-		
+
 		try {
 			JSONArray arrJson = new JSONArray(request.getReader().readLine());
 			JdbcAgency jdbc = new JdbcAgency();
 			jdbc.setDefaults(ConfigUtils.getVirtualSessionUser());
-			
+
 			Helper helper = new Helper(request, new eswf.dataobject.Map());
 			if(helper != null) {
 				userId = (String) helper.getUser().get("usr_id");
 			}
-			
+
 			if(arrJson != null) {
 				for(int i = 0; i < arrJson.size(); i++) {
 					Map<String, Object> map = new HashMap<String, Object>();
 					Map<String, Object> seq = null;
 					JSONObject jsonObj = (JSONObject) arrJson.get(i);
-					
+
 					Iterator<String> keys = jsonObj.keys();
 					seq = jdbc.executeQuery("skb/prstatus", "select.prstatus.idx", null);
-					
+
 					while (keys.hasNext()) {
 						String key = (String) keys.next();
 						String value = jsonObj.getString(key);
 						map.put("seq", seq.get("seq"));
 						map.put(key, value);
-						
+
 						if(jsonObj.getString("pr_status_cd").equals("PR_START")) {
 							map.put("pr_status", "1.구매업무 착수");
 						}else if(jsonObj.getString("pr_status_cd").equals("EP_SELECT")) {
@@ -97,30 +98,29 @@ public class PRStatusInfoSave extends HttpServlet {
 						}else if(jsonObj.getString("pr_status_cd").equals("DEL_PR")) {
 							map.put("pr_status", "6.구매계약 아님");
 						}
-						
+
 						if(userId != null) {
 							map.put("create_user", userId);
 						}
 					}
-					
+
 					jdbc.executeUpdate("skb/prstatus", "insert.excel.valid.item", map);
 				}
 			}
 			
-			System.out.println("request >>> " + request.getReader().readLine());
 			jdbc.executeUpdate("skb/prstatus", "delete.temp.excel.item", null);
 
 			status = "SUCC";
 			message = "저장 되었습니다.";
 			resultJson.put("status", status);
 			resultJson.put("message", message);
-			
+
 			response.setContentType("application/json; charset=UTF-8");
 			PrintWriter writer = response.getWriter();
 			writer.write(resultJson.toString());
 			writer.flush();
 			TransactionManager.getInstance().accept();
-			
+
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
@@ -137,7 +137,7 @@ public class PRStatusInfoSave extends HttpServlet {
 		}finally {
 			TransactionManager.getInstance().removeSession();
 		}
-		
+
 	}
 
 }
